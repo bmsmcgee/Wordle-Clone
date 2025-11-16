@@ -1,41 +1,41 @@
 // src/App.tsx
 
 import type { FC } from "react";
-import type { TileStatus } from "./components/Tile";
-import type { WordleRow } from "./components/WordleGrid";
-import WordleGrid from "./components/WordleGrid";
-
-const WORD_LENGTH = 5;
-const MAX_GUESSES = 6;
-
-// Helper to quickly build a row
-function buildRow(letters: string, statuses: TileStatus[]): WordleRow {
-  return letters.split("").map((letter, index) => ({
-    letter,
-    state: statuses[index] ?? "empty",
-  }));
-}
+import type { KeyState, KeyType } from "./components/Key";
+import Key from "./components/Key";
 
 const App: FC = () => {
-  const rows: WordleRow[] = [
-    // Past guess (fully evaluated)
-    buildRow("REACT", ["correct", "present", "absent", "absent", "present"]),
-    // Current guess being typed (editing)
-    buildRow("ST A ", ["editing", "editing", "editing", "empty", "empty"]),
-    // Rest will be empty rows (no data passed)
-  ];
+  const statuses: KeyState[] = ["idle", "correct", "present", "absent"];
+
+  const letterRow = "QWERTYUIOP".split("");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
-      <div className="px-4 py-8 border border-slate-800 rounded-xl bg-slate-900">
-        <h1 className="text-center text-3xl font-extrabold tracking-[0.25em] mb-6">
-          WORDLE
+      <div className="space-y-4">
+        <h1 className="text-center text-lg tracking-[0.2em]">
+          KEYBOARD KEY DEMO
         </h1>
-        <WordleGrid
-          rows={rows}
-          wordLength={WORD_LENGTH}
-          maxGuesses={MAX_GUESSES}
-        />
+
+        {/* Letter row with all statuses demoed on the first 4 keys */}
+        <div className="flex gap-1 justify-center">
+          {letterRow.map((letter, index) => {
+            const status = statuses[index] ?? "idle";
+            return (
+              <Key
+                key={letter}
+                label={letter}
+                type={"letter" satisfies KeyType}
+                state={status}
+              />
+            );
+          })}
+        </div>
+
+        {/* Enter + Backspace examples */}
+        <div className="flex gap-2 justify-center">
+          <Key label="ENTER" type="return" state="idle" />
+          <Key label="⌫" type="delete" state="idle" />
+        </div>
       </div>
     </div>
   );
