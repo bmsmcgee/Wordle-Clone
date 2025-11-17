@@ -32,7 +32,9 @@ const useKeyboard = ({
           tagName === "TEXTAREA" ||
           target.isContentEditable;
 
-        if (isEditable) {
+        const isButton: boolean = tagName === "BUTTON";
+
+        if (isEditable || isButton) {
           return;
         }
       }
