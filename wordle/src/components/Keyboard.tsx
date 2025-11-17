@@ -1,4 +1,4 @@
-import type { FC } from "react";
+import type { FC, JSX } from "react";
 import type { KeyState, KeyType } from "./Key";
 import Key from "./Key";
 
@@ -28,7 +28,9 @@ export type KeyboardRow = KeyboardKey[];
  * - className  : Optional extra className
  */
 interface KeyboardProps {
-  keyStates: Partial<Record<string, KeyState>>;
+  keyStates?: Partial<Record<string, KeyState>>;
+  onLetterClick: (letter: string) => void;
+  onDeleteClick?: () => void;
   className?: string;
 }
 
@@ -74,29 +76,60 @@ const KEYBOARD_LAYOUT: KeyboardRow[] = [
 
 const Keyboard: FC<KeyboardProps> = ({
   keyStates,
+  onLetterClick,
+  onDeleteClick,
   className,
 }: KeyboardProps) => {
   const containerClasses = ["space-y-2", className].filter(Boolean).join(" ");
 
+  const clickHandler = (keyDef: KeyboardKey): (() => void) | undefined => {
+    if (keyDef.type === "letter" && typeof onLetterClick === "function") {
+      return (): void => {
+        onLetterClick(keyDef.code);
+      };
+    }
+
+    if (keyDef.type === "delete" && typeof onDeleteClick === "function") {
+      return (): void => {
+        onDeleteClick();
+      };
+    }
+
+    return undefined;
+  };
+
+  const renderKey = (keyDef: KeyboardKey): JSX.Element => {
+    const state: KeyState = keyStates?.[keyDef.code] ?? "idle";
+
+    const handleClick: (() => void) | undefined = clickHandler(keyDef);
+
+    return (
+      <>
+        <Key
+          key={keyDef.code}
+          label={keyDef.label}
+          type={keyDef.type}
+          state={state}
+          onClick={handleClick}
+        />
+      </>
+    );
+  };
+
+  const renderRow = (row: KeyboardRow, rowIdx: number): JSX.Element => {
+    return (
+      <>
+        <div key={rowIdx} className="flex justify-center gap-1">
+          {row.map(renderKey)}
+        </div>
+      </>
+    );
+  };
+
   return (
     <>
-      <div className={containerClasses} aria-label="On Screen Keyboard">
-        {KEYBOARD_LAYOUT.map((row: KeyboardRow, rowIdx: number) => (
-          <div key={rowIdx} className="flex justify-center gap-1">
-            {row.map((keyDef: KeyboardKey) => {
-              const state: KeyState = keyStates?.[keyDef.code] ?? "idle";
-
-              return (
-                <Key
-                  key={keyDef.code}
-                  label={keyDef.label}
-                  type={keyDef.type}
-                  state={state}
-                />
-              );
-            })}
-          </div>
-        ))}
+      <div className={containerClasses} aria-label="Screen keyboard">
+        {KEYBOARD_LAYOUT.map(renderRow)}
       </div>
     </>
   );

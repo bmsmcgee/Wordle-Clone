@@ -1,34 +1,61 @@
 // src/App.tsx
 
 import type { FC } from "react";
-import type { TileStatus } from "./components/Tile";
+import { useState } from "react";
 import type { WordleRow } from "./components/WordleGrid";
-import type { KeyState } from "./components/Key";
+import type { TileStatus } from "./components/Tile";
 import WordleGrid from "./components/WordleGrid";
 import Keyboard from "./components/Keyboard";
 
 const WORD_LENGTH = 5;
 const MAX_GUESSES = 6;
 
-function buildRow(letters: string, statuses: TileStatus[]): WordleRow {
-  return letters.split("").map((letter, index) => ({
-    letter,
-    state: statuses[index] ?? "empty",
-  }));
-}
+/**
+ * Build a single "editing" row from the current guess string.
+ * - Filled positions are "editing".
+ * - Remaining positions are "empty".
+ */
+const buildEditingRow = (guess: string): WordleRow => {
+  return Array.from({ length: WORD_LENGTH }, (_unused, index) => {
+    const letter: string = guess[index] ?? "";
+    const state: TileStatus = letter ? "editing" : "empty";
+
+    return {
+      letter,
+      state,
+    };
+  });
+};
 
 const App: FC = () => {
-  const rows: WordleRow[] = [
-    buildRow("REACT", ["correct", "present", "absent", "absent", "present"]),
-  ];
+  const [currentGuess, setCurrentGuess] = useState<string>("");
 
-  const keyStatuses: Partial<Record<string, KeyState>> = {
-    R: "correct",
-    E: "present",
-    A: "absent",
-    C: "absent",
-    T: "present",
+  /**
+   * Handle a letter being clicked on the on-screen keyboard.
+   *
+   * - Only appends if we haven't reached WORD_LENGTH yet.
+   * - Ignores clicks once the row is "full".
+   */
+  const handleLetterClick = (letter: string): void => {
+    setCurrentGuess((prevGuess: string): string => {
+      if (prevGuess.length >= WORD_LENGTH) {
+        return prevGuess;
+      }
+      return prevGuess + letter;
+    });
   };
+
+  const handleDeleteClick = (): void => {
+    setCurrentGuess((prevGuess: string): string => {
+      if (prevGuess.length === 0) {
+        return prevGuess;
+      }
+      return prevGuess.slice(0, prevGuess.length - 1);
+    });
+  };
+
+  // For now, just have the first row be the current guess.
+  const rows: WordleRow[] = [buildEditingRow(currentGuess)];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
@@ -43,7 +70,10 @@ const App: FC = () => {
           maxGuesses={MAX_GUESSES}
         />
 
-        <Keyboard keyStates={keyStatuses} />
+        <Keyboard
+          onLetterClick={handleLetterClick}
+          onDeleteClick={handleDeleteClick}
+        />
       </div>
     </div>
   );

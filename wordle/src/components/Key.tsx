@@ -31,6 +31,7 @@ interface KeyProps {
   label: ReactNode;
   type: KeyType;
   state: KeyState;
+  onClick?: () => void;
   className?: string;
 }
 
@@ -60,6 +61,7 @@ const Key: FC<KeyProps> = ({
   label,
   type,
   state = "idle",
+  onClick,
   className,
 }: KeyProps) => {
   const baseClasses =
@@ -73,12 +75,14 @@ const Key: FC<KeyProps> = ({
   ]
     .filter(Boolean)
     .join(" ");
+
   return (
     <>
       <div
         className={combinedClasses}
         role="button"
         aria-label={typeof label === "string" ? `Key ${label}` : "Keyboard key"}
+        onClick={onClick}
       >
         {label}
       </div>
