@@ -1,43 +1,15 @@
 import { useEffect, useState, type FC } from "react";
-import type { TileStatus } from "./components/Tile";
 import type { WordleRow } from "./components/WordleGrid";
 import WordleGrid from "./components/WordleGrid";
 import Keyboard from "./components/Keyboard";
 import useKeyboard from "./hooks/useKeyboard";
 import { getRandomWord, isValidGuess } from "./data/wordSource";
-import { buildKeyboardMap, evaluateGuessState } from "./gameLogic";
+import { buildKeyboardMap } from "./gameLogic";
 import type { KeyState } from "./components/Key";
-
-const WORD_LENGTH: number = 5;
-const MAX_GUESS: number = 6;
-
-type GameStatus = "playing" | "won" | "lost";
-
-const buildCommittedRow = (guess: string, solution: string): WordleRow => {
-  const evaluatedState = evaluateGuessState(guess, solution);
-
-  return Array.from({ length: WORD_LENGTH }, (_unused, idx) => {
-    const letter: string = guess[idx] ?? "";
-    const state: TileStatus = evaluatedState[idx] ?? "absent";
-
-    return {
-      letter,
-      state,
-    };
-  });
-};
-
-const buildEditingRow = (guess: string): WordleRow => {
-  return Array.from({ length: WORD_LENGTH }, (_unused, idx) => {
-    const letter: string = guess[idx] ?? "";
-    const state: TileStatus = letter ? "editing" : "empty";
-
-    return {
-      letter,
-      state,
-    };
-  });
-};
+import { MAX_GUESS, WORD_LENGTH, type GameStatus } from "./game/config";
+import { buildCommittedRow, buildEditingRow } from "./game/rows";
+import type { ToastVariant } from "./components/Toast";
+import Toast from "./components/Toast";
 
 const App: FC = () => {
   const [solution, setSolution] = useState<string>(() => getRandomWord());
@@ -85,6 +57,7 @@ const App: FC = () => {
 
     if (!isValidGuess(guess)) {
       setMessage("Not in word list");
+      setCurrentGuess("");
       return;
     }
 
@@ -155,16 +128,16 @@ const App: FC = () => {
     };
   }, [message]);
 
-  const getToastClasses = (): string => {
+  const getToastVariant = (): ToastVariant => {
     if (gameStatus === "won") {
-      return "border-emerald-400 text-emerald-50";
+      return "success";
     }
 
     if (gameStatus === "lost") {
-      return "border-rose-400 text-rose-50";
+      return "error";
     }
 
-    return "border-slate-500 text-slate-50";
+    return "info";
   };
 
   const handleResetGame = (
@@ -184,19 +157,8 @@ const App: FC = () => {
   return (
     <>
       <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
-        {message && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
-            <div
-              className={`
-        px-4 py-2 rounded-lg border shadow-lg text-sm
-        bg-slate-900/80 backdrop-blur-sm
-        ${getToastClasses()}
-      `}
-            >
-              {message}
-            </div>
-          </div>
-        )}
+        {message && <Toast message={message} variant={getToastVariant()} />}
+
         <div className="px-4 py-8 border border-slate-800 rounded-xl bg-slate-900 space-y-6">
           <h1 className="text-center text-3xl font-extrabold tracking-[0.25em]">
             WORDLE
@@ -224,7 +186,6 @@ const App: FC = () => {
               New Game
             </button>
           </div>
-          {solution}
         </div>
       </div>
     </>
