@@ -17,23 +17,23 @@ const normalizeWordList = (raw: string): string[] => {
  * Allowed solution words
  */
 const SOLUTION_WORDS: string[] = normalizeWordList(wordList);
+const SOLUTION_SET: Set<string> = new Set(SOLUTION_WORDS);
 
 /**
  * Allowed guess words (cannot be solution words)
  */
 const GUESS_WORDS: string[] = normalizeWordList(allowedGuesses);
+const GUESS_SET: Set<string> = new Set(GUESS_WORDS);
 
 /**
  * Acquire single random word from list
  */
 export const getRandomWord = (): string => {
-  const listLength: number = SOLUTION_WORDS.length;
-
-  if (listLength === 0) {
+  if (SOLUTION_WORDS.length === 0) {
     throw new Error("Empty word list. Verify wordles.txt is present.");
   }
 
-  const randomIdx: number = Math.floor(Math.random() * listLength);
+  const randomIdx: number = Math.floor(Math.random() * SOLUTION_WORDS.length);
   return SOLUTION_WORDS[randomIdx];
 };
 
@@ -41,17 +41,17 @@ export const getRandomWord = (): string => {
  * Check if guess is allowed.
  */
 export const isValidGuess = (rawGuess: string): boolean => {
-  const guess: string = rawGuess.trimRight().toUpperCase();
+  const guess: string = rawGuess.trim().toUpperCase();
 
   if (guess.length === 0) {
     return false;
   }
 
-  if (SOLUTION_WORDS.includes(guess)) {
+  if (SOLUTION_SET.has(guess)) {
     return true;
   }
 
-  if (GUESS_WORDS.includes(guess)) {
+  if (GUESS_SET.has(guess)) {
     return true;
   }
 

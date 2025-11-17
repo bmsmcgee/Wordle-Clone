@@ -4,7 +4,7 @@ import type { WordleRow } from "./components/WordleGrid";
 import WordleGrid from "./components/WordleGrid";
 import Keyboard from "./components/Keyboard";
 import useKeyboard from "./hooks/useKeyboard";
-import { getRandomWord } from "./data/wordSource";
+import { getRandomWord, isValidGuess } from "./data/wordSource";
 
 const WORD_LENGTH = 5;
 const MAX_GUESS = 6;
@@ -37,6 +37,7 @@ const App: FC = () => {
   const [solution, setSolution] = useState<string>(() => getRandomWord());
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<string[]>([]);
+  const [message, setMessage] = useState<string>("");
 
   const handleLetterClick = (letter: string): void => {
     setCurrentGuess((prevGuess: string): string => {
@@ -57,6 +58,18 @@ const App: FC = () => {
   };
 
   const handleReturnClick = (): void => {
+    const guess: string = currentGuess;
+
+    if (guess.length !== WORD_LENGTH) {
+      setMessage("Not enough letters.");
+      return;
+    }
+
+    if (!isValidGuess(guess)) {
+      setMessage("Not in word list");
+      return;
+    }
+
     setGuesses((prevGuesses: string[]): string[] => {
       const canCommit: boolean =
         currentGuess.length === WORD_LENGTH && prevGuesses.length < MAX_GUESS;
@@ -74,6 +87,8 @@ const App: FC = () => {
       }
       return prevGuess;
     });
+
+    setMessage("");
   };
 
   const buildRows = (): WordleRow[] => {
@@ -112,6 +127,10 @@ const App: FC = () => {
           wordLength={WORD_LENGTH}
           maxGuesses={MAX_GUESS}
         />
+
+        {message && (
+          <div className="text-center text-sm text-amber-400">{message}</div>
+        )}
 
         <Keyboard
           onLetterClick={handleLetterClick}
