@@ -3,6 +3,7 @@ import type { TileStatus } from "./components/Tile";
 import type { WordleRow } from "./components/WordleGrid";
 import WordleGrid from "./components/WordleGrid";
 import Keyboard from "./components/Keyboard";
+import useKeyboard from "./hooks/useKeyboard";
 
 const WORD_LENGTH = 5;
 const MAX_GUESS = 6;
@@ -90,6 +91,12 @@ const App: FC = () => {
   };
 
   const rows: WordleRow[] = buildRows();
+
+  useKeyboard({
+    onLetter: handleLetterClick,
+    onDelete: handleDeleteClick,
+    onReturn: handleReturnClick,
+  });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
