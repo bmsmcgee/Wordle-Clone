@@ -4,6 +4,7 @@ import type { WordleRow } from "./components/WordleGrid";
 import WordleGrid from "./components/WordleGrid";
 import Keyboard from "./components/Keyboard";
 import useKeyboard from "./hooks/useKeyboard";
+import { getRandomWord } from "./data/wordSource";
 
 const WORD_LENGTH = 5;
 const MAX_GUESS = 6;
@@ -33,6 +34,7 @@ const buildEditingRow = (guess: string): WordleRow => {
 };
 
 const App: FC = () => {
+  const [solution, setSolution] = useState<string>(() => getRandomWord());
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [guesses, setGuesses] = useState<string[]>([]);
 
