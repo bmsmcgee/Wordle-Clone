@@ -1,4 +1,4 @@
-import { useState, type FC } from "react";
+import { useEffect, useState, type FC } from "react";
 import type { TileStatus } from "./components/Tile";
 import type { WordleRow } from "./components/WordleGrid";
 import WordleGrid from "./components/WordleGrid";
@@ -8,8 +8,8 @@ import { getRandomWord, isValidGuess } from "./data/wordSource";
 import { buildKeyboardMap, evaluateGuessState } from "./gameLogic";
 import type { KeyState } from "./components/Key";
 
-const WORD_LENGTH = 5;
-const MAX_GUESS = 6;
+const WORD_LENGTH: number = 5;
+const MAX_GUESS: number = 6;
 
 type GameStatus = "playing" | "won" | "lost";
 
@@ -141,20 +141,31 @@ const App: FC = () => {
     onReturn: handleReturn,
   });
 
-  const getStatusLabel = (): string => {
+  useEffect(() => {
+    if (!message) {
+      return;
+    }
+
+    const timeoutId: number = window.setTimeout(() => {
+      setMessage("");
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [message]);
+
+  const getToastClasses = (): string => {
     if (gameStatus === "won") {
-      const attempts = guesses.length;
-      return `You won in ${attempts} ${attempts === 1 ? "guess" : "guesses"}!`;
+      return "border-emerald-400 text-emerald-50";
     }
 
     if (gameStatus === "lost") {
-      return `You lost. The word was ${solution}.`;
+      return "border-rose-400 text-rose-50";
     }
 
-    return message;
+    return "border-slate-500 text-slate-50";
   };
-
-  const statusLabel: string = getStatusLabel();
 
   const handleResetGame = (
     event?: React.MouseEvent<HTMLButtonElement>
@@ -171,51 +182,52 @@ const App: FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
-      <div className="px-4 py-8 border border-slate-800 rounded-xl bg-slate-900 space-y-6">
-        <h1 className="text-center text-3xl font-extrabold tracking-[0.25em]">
-          WORDLE
-        </h1>
-
-        <WordleGrid
-          rows={rows}
-          wordLength={WORD_LENGTH}
-          maxGuesses={MAX_GUESS}
-        />
-
-        {statusLabel && (
-          <div
-            className={`text-center text-sm ${
-              gameStatus === "won"
-                ? "text-emerald-400"
-                : gameStatus === "lost"
-                ? "text-rose-400"
-                : "text-amber-400"
-            }`}
-          >
-            {statusLabel}
+    <>
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
+        {message && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none">
+            <div
+              className={`
+        px-4 py-2 rounded-lg border shadow-lg text-sm
+        bg-slate-900/80 backdrop-blur-sm
+        ${getToastClasses()}
+      `}
+            >
+              {message}
+            </div>
           </div>
         )}
+        <div className="px-4 py-8 border border-slate-800 rounded-xl bg-slate-900 space-y-6">
+          <h1 className="text-center text-3xl font-extrabold tracking-[0.25em]">
+            WORDLE
+          </h1>
 
-        <Keyboard
-          keyStates={keyStates}
-          onLetterClick={handleLetter}
-          onDeleteClick={handleDelete}
-          onReturnClick={handleReturn}
-        />
+          <WordleGrid
+            rows={rows}
+            wordLength={WORD_LENGTH}
+            maxGuesses={MAX_GUESS}
+          />
 
-        <div className="flex justify-center pt-2">
-          <button
-            type="button"
-            onClick={handleResetGame}
-            className="text-xs px-3 py-1 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-800"
-          >
-            New Game
-          </button>
+          <Keyboard
+            keyStates={keyStates}
+            onLetterClick={handleLetter}
+            onDeleteClick={handleDelete}
+            onReturnClick={handleReturn}
+          />
+
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={handleResetGame}
+              className="text-xs px-3 py-1 rounded-full border border-slate-600 text-slate-300 hover:bg-slate-800"
+            >
+              New Game
+            </button>
+          </div>
+          {solution}
         </div>
-        {solution}
       </div>
-    </div>
+    </>
   );
 };
 
