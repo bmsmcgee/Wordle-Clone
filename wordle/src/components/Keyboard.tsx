@@ -31,6 +31,7 @@ interface KeyboardProps {
   keyStates?: Partial<Record<string, KeyState>>;
   onLetterClick: (letter: string) => void;
   onDeleteClick?: () => void;
+  onReturnClick?: () => void;
   className?: string;
 }
 
@@ -78,6 +79,7 @@ const Keyboard: FC<KeyboardProps> = ({
   keyStates,
   onLetterClick,
   onDeleteClick,
+  onReturnClick,
   className,
 }: KeyboardProps) => {
   const containerClasses = ["space-y-2", className].filter(Boolean).join(" ");
@@ -92,6 +94,12 @@ const Keyboard: FC<KeyboardProps> = ({
     if (keyDef.type === "delete" && typeof onDeleteClick === "function") {
       return (): void => {
         onDeleteClick();
+      };
+    }
+
+    if (keyDef.type === "return" && typeof onReturnClick === "function") {
+      return (): void => {
+        onReturnClick();
       };
     }
 
