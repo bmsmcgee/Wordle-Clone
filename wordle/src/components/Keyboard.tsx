@@ -112,25 +112,21 @@ const Keyboard: FC<KeyboardProps> = ({
     const handleClick: (() => void) | undefined = clickHandler(keyDef);
 
     return (
-      <>
-        <Key
-          key={keyDef.code}
-          label={keyDef.label}
-          type={keyDef.type}
-          state={state}
-          onClick={handleClick}
-        />
-      </>
+      <Key
+        key={keyDef.code}
+        label={keyDef.label}
+        type={keyDef.type}
+        state={state}
+        onClick={handleClick}
+      />
     );
   };
 
   const renderRow = (row: KeyboardRow, rowIdx: number): JSX.Element => {
     return (
-      <>
-        <div key={rowIdx} className="flex justify-center gap-1">
-          {row.map(renderKey)}
-        </div>
-      </>
+      <div key={rowIdx} className="flex justify-center gap-1">
+        {row.map(renderKey)}
+      </div>
     );
   };
 

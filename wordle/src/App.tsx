@@ -161,7 +161,7 @@ const App: FC = () => {
 
         <div className="px-4 py-8 border border-slate-800 rounded-xl bg-slate-900 space-y-6">
           <h1 className="text-center text-3xl font-extrabold tracking-[0.25em]">
-            WORDLE
+            WORDLE CLONE
           </h1>
 
           <WordleGrid
